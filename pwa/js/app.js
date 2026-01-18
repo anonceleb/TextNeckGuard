@@ -21,14 +21,32 @@ const state = {
     stream: null
 };
 
-// DOM Elements
-const views = {
-    landing: document.getElementById('landing-view'),
-    analysis: document.getElementById('analysis-view'),
-    result: document.getElementById('result-view')
-};
+// Supabase Configuration
+const SUPABASE_URL = 'https://jgutioxkysbudlazuyhs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bAGQwQopWHk2rNvW29luFw_2lJcErzQ';
+let supabase = null;
 
+if (window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase initialized");
+} else {
+    console.error("Supabase SDK not loaded");
+}
+
+let currentUser = null;
+
+// DOM Elements
 const elements = {
+    // Auth
+    authBtn: document.getElementById('auth-btn'),
+    authStatus: document.getElementById('auth-status'),
+    uploadBtn: document.getElementById('upload-btn'),
+
+    // Views
+    landingView: document.getElementById('landing-view'),
+    analysisView: document.getElementById('analysis-view'),
+    resultView: document.getElementById('result-view'),
+
     startBtn: document.getElementById('start-btn'),
     recordBtn: document.getElementById('record-btn'),
     stopBtn: document.getElementById('stop-btn'),
@@ -69,19 +87,121 @@ const ctx = elements.canvas.getContext('2d');
 // -- Initialization --
 
 document.addEventListener('DOMContentLoaded', () => {
+    initAuth();
     initListeners();
 });
 
 function initListeners() {
     elements.startBtn.addEventListener('click', startCamera);
-    elements.recordBtn.addEventListener('click', startRecording);
-    elements.stopBtn.addEventListener('click', stopRecording);
+    elements.recordBtn.addEventListener('click', toggleRecording);
     elements.flipBtn.addEventListener('click', toggleCamera);
-    elements.closeBtn.addEventListener('click', showLanding);
-    elements.newScanBtn.addEventListener('click', showLanding);
+    elements.closeBtn.addEventListener('click', showLanding); // Fixed: backBtn -> closeBtn
+    elements.authBtn.addEventListener('click', handleAuth);
+    elements.uploadBtn.addEventListener('click', handleUpload);
+
+    if (elements.newScanBtn) {
+        elements.newScanBtn.addEventListener('click', showLanding);
+    }
 
     // Adjust canvas size on resize
     window.addEventListener('resize', resizeCanvas);
+}
+
+// Auth Logic
+async function initAuth() {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    updateAuthUI(user);
+
+    // Listen for changes
+    supabase.auth.onAuthStateChange((event, session) => {
+        updateAuthUI(session?.user ?? null);
+    });
+}
+
+function updateAuthUI(user) {
+    currentUser = user;
+    if (user) {
+        elements.authStatus.style.display = 'block';
+        document.getElementById('user-email').textContent = user.email;
+        elements.authBtn.textContent = "Sign Out";
+        elements.uploadBtn.style.display = 'inline-block';
+    } else {
+        elements.authStatus.style.display = 'none';
+        elements.authBtn.textContent = "Sign In";
+        elements.uploadBtn.style.display = 'none';
+    }
+}
+
+async function handleAuth() {
+    if (currentUser) {
+        await supabase.auth.signOut();
+    } else {
+        const email = prompt("Enter your email for Sign In / Sign Up:");
+        if (!email) return;
+        const password = prompt("Enter password:");
+        if (!password) return;
+
+        // Try sign in
+        let { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+            // If fail, try sign up
+            const { error: signUpError } = await supabase.auth.signUp({ email, password });
+            if (signUpError) {
+                alert("Auth Error: " + signUpError.message);
+            } else {
+                alert("Account created! Check email if required, or sign in now.");
+            }
+        }
+    }
+}
+
+async function handleUpload() {
+    if (!currentUser) {
+        alert("Please sign in first.");
+        return;
+    }
+
+    if (recordedChunks.length === 0) {
+        alert("No video recorded!");
+        return;
+    }
+
+    elements.uploadBtn.textContent = "Uploading...";
+    elements.uploadBtn.disabled = true;
+
+    try {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const fileName = `${currentUser.id}/${Date.now()}_run.webm`;
+
+        // 1. Upload Video
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('videos')
+            .upload(fileName, blob);
+
+        if (uploadError) throw uploadError;
+
+        // 2. Save Analysis
+        const { error: dbError } = await supabase
+            .from('activities')
+            .insert({
+                user_id: currentUser.id,
+                video_url: fileName,
+                ai_analysis_json: history, // Save the raw metrics history
+                date: new Date().toISOString(),
+                status: 'pending'
+            });
+
+        if (dbError) throw dbError;
+
+        alert("Run sent to coach! 🚀");
+        elements.uploadBtn.textContent = "Sent ✓";
+    } catch (e) {
+        console.error(e);
+        alert("Upload failed: " + e.message);
+        elements.uploadBtn.textContent = "Retry Upload";
+        elements.uploadBtn.disabled = false;
+    }
 }
 
 function switchView(viewName) {

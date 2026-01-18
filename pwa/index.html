@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- MediaPipe dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
         crossorigin="anonymous"></script>
@@ -21,6 +22,11 @@
             <header>
                 <h1>🏃 Form Check Friday</h1>
                 <p>AI-powered running form analysis</p>
+                <div id="auth-status" style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 0.5rem; display:none;">
+                    Logged in as <span id="user-email"></span>
+                </div>
+                <button id="auth-btn" class="btn secondary-btn"
+                    style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1rem;">Sign In</button>
             </header>
 
             <div class="card intro-card">
@@ -125,7 +131,8 @@
             </div>
 
             <div class="actions">
-                <button id="share-btn" class="btn secondary-btn">Share Report</button>
+                <button id="upload-btn" class="btn primary-btn">☁️ Send to Coach</button>
+                <button id="share-btn" class="btn secondary-btn">Share Local Report</button>
             </div>
         </div>
     </div>

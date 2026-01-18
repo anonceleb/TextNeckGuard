@@ -58,6 +58,9 @@ class GaitMetrics:
     confidence_scores: list = field(default_factory=list)
     avg_confidence: float = 0.0
     data_quality: str = "Unknown"
+    
+    # Coach review
+    keyframes: dict = field(default_factory=dict)
 
 
 def calculate_angle(a: tuple, b: tuple, c: tuple) -> float:
@@ -223,6 +226,10 @@ class RunningFormAnalyzer:
         self._calculate_final_metrics(frame_count)
         self._detect_steps_improved()
         
+        # Extract keyframes if output path is known (derive dir from video path)
+        output_dir = self.video_path.parent
+        self.metrics.keyframes = self.extract_keyframes(output_dir)
+        
         return self.metrics
     
     def _draw_metrics_overlay(self, frame, left_knee_angle, right_knee_angle,
@@ -298,6 +305,76 @@ class RunningFormAnalyzer:
             oscillation = np.max(self.hip_y_positions) - np.min(self.hip_y_positions)
             estimated_height = self.frame_height * 0.5
             self.metrics.avg_vertical_oscillation = (oscillation / estimated_height) * 100
+
+    def extract_keyframes(self, output_dir: Path) -> dict:
+        """
+        Identify and save key gait phase frames.
+        Returns a dict of {phase_name: image_path}
+        """
+        if not self.left_ankle_history or not self.right_ankle_history:
+            return {}
+
+        # Convert history to arrays for easier processing
+        l_ankle_y = np.array(self.left_ankle_history)
+        r_ankle_y = np.array(self.right_ankle_history)
+        
+        # Find Initial Contact (IC) - Local maxima in Y (lowest point in image)
+        # In image coords, larger Y is lower. So we look for peaks in Y.
+        from scipy.signal import find_peaks
+        
+        # We need a rough cadence to determine distance between peaks
+        min_dist = max(5, int(self.fps * 0.25)) # separation ~250ms
+        
+        l_contacts, _ = find_peaks(l_ankle_y, distance=min_dist)
+        r_contacts, _ = find_peaks(r_ankle_y, distance=min_dist)
+        
+        # Select the "best" representative step (middle of the run)
+        best_l_contact = l_contacts[len(l_contacts)//2] if len(l_contacts) > 0 else None
+        best_r_contact = r_contacts[len(r_contacts)//2] if len(r_contacts) > 0 else None
+        
+        keyframes = {}
+        
+        # Helper to extract and save frame
+        def save_frame(frame_idx, name):
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+            success, frame = self.cap.read()
+            if success:
+                # Add label
+                cv2.putText(frame, name, (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 
+                           1.5, (0, 0, 255), 3)
+                out_path = output_dir / f"{self.video_path.stem}_{name.replace(' ', '_')}.jpg"
+                cv2.imwrite(str(out_path), frame)
+                return str(out_path)
+            return None
+
+        # Re-open video for reading frames
+        self.cap = cv2.VideoCapture(str(self.video_path))
+        
+        if best_l_contact is not None:
+             # Initial Contact (Left)
+             path = save_frame(best_l_contact, "L Initial Contact")
+             if path: keyframes["L_Contact"] = path
+             
+             # Mid Stance (Left) - approx 15-20% of cycle after contact?
+             # Or search for when ankle x is close to hip x?
+             # Simple heuristic: ~6 frames after contact (at 30fps)
+             mid_idx = best_l_contact + int(self.fps * 0.15) 
+             path = save_frame(mid_idx, "L Mid Stance")
+             if path: keyframes["L_MidStance"] = path
+             
+             # Toe Off (Left) - Max hip extension
+             # Or simple heuristic: ~35% of cycle
+             toe_off_idx = best_l_contact + int(self.fps * 0.35)
+             path = save_frame(toe_off_idx, "L Toe Off")
+             if path: keyframes["L_ToeOff"] = path
+
+        if best_r_contact is not None:
+             # Just grab Right Contact for balance
+             path = save_frame(best_r_contact, "R Initial Contact")
+             if path: keyframes["R_Contact"] = path
+        
+        self.cap.release()
+        return keyframes
 
 
 def generate_html_report(metrics: GaitMetrics, video_path: str, analyzed_video_path: str) -> str:
@@ -679,6 +756,18 @@ def generate_html_report(metrics: GaitMetrics, video_path: str, analyzed_video_p
             </div>
         </div>
         
+        <div class="summary-section">
+            <h2>📸 Coach Review: Key Gait Phases</h2>
+            <div class="metrics-grid">
+                {"".join(f'''
+                <div class="metric-card">
+                    <div class="metric-label">{name}</div>
+                    <img src="data:image/jpeg;base64,{base64.b64encode(open(path, "rb").read()).decode("utf-8")}" style="width:100%; border-radius:0.5rem; margin-top:0.5rem;">
+                </div>
+                ''' for name, path in metrics.keyframes.items()) if metrics.keyframes else "<p>No keyframes detected.</p>"}
+            </div>
+        </div>
+
         <div class="summary-section">
             <h2>🎯 Priority Focus Areas</h2>
             <ol class="priority-list">

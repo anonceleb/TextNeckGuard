@@ -150,6 +150,11 @@ function updateAuthUI(user) {
 }
 
 async function handleAuth() {
+    if (!supabase) {
+        alert("Unable to connect to login server. Please check your internet connection or reload.");
+        return;
+    }
+
     if (currentUser) {
         await supabase.auth.signOut();
     } else {

@@ -96,9 +96,10 @@
 
     function initListeners() {
         elements.startBtn.addEventListener('click', startCamera);
-        elements.recordBtn.addEventListener('click', toggleRecording);
+        elements.recordBtn.addEventListener('click', startRecording);
+        elements.stopBtn.addEventListener('click', stopRecording);
         elements.flipBtn.addEventListener('click', toggleCamera);
-        elements.closeBtn.addEventListener('click', showLanding); // Fixed: backBtn -> closeBtn
+        elements.closeBtn.addEventListener('click', showLanding);
         elements.authBtn.addEventListener('click', handleAuth);
         elements.uploadBtn.addEventListener('click', handleUpload);
 
@@ -249,7 +250,7 @@
         elements.loading.classList.remove('hidden');
 
         try {
-            await initCamera();
+            await setupCameraStream();
 
             if (!state.pose) {
                 await initPose();

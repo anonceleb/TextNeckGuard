@@ -14,8 +14,13 @@ venv/
 *.avi
 *.mkv
 
-# Temporary
+# Analysis outputs
 *_analyzed.mp4
+*_report.html
+*_analyzed.json
+IMG_*.jpg
+IMG_*.MOV
+*.webm
 *_report.txt
 *_report.html
 debug_frame_*.jpg

@@ -121,14 +121,30 @@ async function initAuth() {
 
 function updateAuthUI(user) {
     currentUser = user;
+
+    // Toggle UI based on auth state
     if (user) {
+        // Logged In
         elements.authStatus.style.display = 'block';
         document.getElementById('user-email').textContent = user.email;
         elements.authBtn.textContent = "Sign Out";
+        elements.authBtn.classList.add('secondary-btn');
+        elements.authBtn.classList.remove('primary-btn');
+        elements.authBtn.style.marginTop = '0'; // Reset style
+
+        // Show Start Button
+        elements.startBtn.style.display = 'block';
+        // Hide the big sign in prompt if we add one (optional, or just reuse authBtn)
+
+        // Results view upload button
         elements.uploadBtn.style.display = 'inline-block';
+        elements.startBtn.textContent = "Start Analysis";
     } else {
+        // Logged Out
         elements.authStatus.style.display = 'none';
-        elements.authBtn.textContent = "Sign In";
+
+        // Prominent Sign In Call to Action
+        elements.startBtn.textContent = "Sign In to Start";
         elements.uploadBtn.style.display = 'none';
     }
 }
@@ -217,19 +233,28 @@ function showLanding() {
 // -- Camera Handling --
 
 async function startCamera() {
-    switchView('analysis');
+    if (!currentUser) {
+        handleAuth();
+        return;
+    }
+
     elements.loading.classList.remove('hidden');
-    resizeCanvas();
 
     try {
-        await initMediaPipe();
-        await setupCameraStream();
+        await initCamera();
+
+        if (!state.pose) {
+            await initPose();
+        }
+
+        switchView('analysis');
+        startAnalysisLoop();
+
+    } catch (e) {
+        console.error(e);
+        alert("Could not start camera: " + e.message);
+    } finally {
         elements.loading.classList.add('hidden');
-    } catch (err) {
-        console.error("Camera start failed:", err);
-        alert("Could not access camera. Please allow permissions.");
-        elements.loading.classList.add('hidden');
-        showLanding();
     }
 }
 

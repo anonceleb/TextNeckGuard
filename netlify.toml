@@ -1,0 +1,4 @@
+[build]
+  base = "pwa"
+  publish = "."
+  command = "echo 'Static site - no build needed'"

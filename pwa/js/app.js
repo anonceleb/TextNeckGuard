@@ -359,15 +359,51 @@ function processResults() {
     const finalLean = avg(state.metrics.leans);
     const finalHip = avg(state.metrics.hipDrops);
 
-    // Oscillation - max - min of hip height relative to frame height
-    const hipMax = Math.max(...history.hipY);
-    const hipMin = Math.min(...history.hipY);
-    const oscillationPx = hipMax - hipMin;
-    const oscillationPct = (oscillationPx / elements.canvas.height) * 100;
+    // Oscillation - Use windowed approach to avoid drift
+    // Group into 1-second chunks (approx 30 frames)
+    const chunkSize = 30;
+    const oscillations = [];
 
-    // Mock Cadence for prototype (calculating from raw signal is complex for a single file)
-    // In a real app we'd do zero-crossing on vertical acceleration
-    const estimatedCadence = 172; // Placeholder if detection fails, or implement simple check
+    if (history.hipY.length > chunkSize) {
+        for (let i = 0; i < history.hipY.length; i += chunkSize) {
+            const chunk = history.hipY.slice(i, i + chunkSize);
+            if (chunk.length < 10) continue;
+
+            const chunkMax = Math.max(...chunk);
+            const chunkMin = Math.min(...chunk);
+            oscillations.push(chunkMax - chunkMin);
+        }
+    }
+
+    const avgOscillationPx = oscillations.length > 0
+        ? oscillations.reduce((a, b) => a + b, 0) / oscillations.length
+        : 0;
+
+    const oscillationPct = (avgOscillationPx / elements.canvas.height) * 100;
+
+    // Cadence - Zero Crossing on Vertical Velocity
+    let stepCount = 0;
+    if (history.hipY.length > 10) {
+        const vels = [];
+        for (let i = 1; i < history.hipY.length; i++) {
+            vels.push(history.hipY[i] - history.hipY[i - 1]);
+        }
+
+        let crossings = 0;
+        for (let i = 1; i < vels.length; i++) {
+            if ((vels[i] >= 0 && vels[i - 1] < 0) || (vels[i] < 0 && vels[i - 1] >= 0)) {
+                crossings++;
+            }
+        }
+        stepCount = crossings;
+    }
+
+    let calculatedCadence = 0;
+    if (durationSec > 1) {
+        calculatedCadence = (stepCount / durationSec) * 60;
+    }
+
+    const estimatedCadence = (calculatedCadence > 120 && calculatedCadence < 240) ? calculatedCadence : 172;
 
     // Display Results
     showResults({

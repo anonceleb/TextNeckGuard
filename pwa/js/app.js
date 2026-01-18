@@ -66,6 +66,13 @@
         liveStats: document.getElementById('live-stats')
     };
 
+    // Views Mapping
+    const views = {
+        landing: elements.landingView,
+        analysis: elements.analysisView,
+        result: elements.resultView
+    };
+
     const resultElements = {
         cadenceVal: document.getElementById('res-cadence'),
         hipVal: document.getElementById('res-hip'),

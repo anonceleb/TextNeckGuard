@@ -1,0 +1,21 @@
+# System
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Large Media Files
+*.MOV
+*.mp4
+*.avi
+*.mkv
+
+# Temporary
+*_analyzed.mp4
+*_report.txt
+*_report.html
+debug_frame_*.jpg

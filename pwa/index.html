@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Form Check Friday</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- MediaPipe dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Landing View -->
+        <div id="landing-view" class="view active">
+            <header>
+                <h1>🏃 Form Check Friday</h1>
+                <p>AI-powered running form analysis</p>
+            </header>
+            
+            <div class="card intro-card">
+                <h2>How it works</h2>
+                <ol>
+                    <li>Place camera at <strong>hip height</strong></li>
+                    <li>Record from the <strong>side</strong> (profile view)</li>
+                    <li>Run for <strong>10-15 seconds</strong></li>
+                    <li>Get instant AI analysis</li>
+                </ol>
+                <div class="illustration">
+                    <!-- Simple CSS illustration or placeholder -->
+                    <div class="cam-setup">
+                        <div class="runner">🏃</div>
+                        <div class="arrow">↔️</div>
+                        <div class="phone">📱</div>
+                    </div>
+                    <p class="small">Distance: 3-5 meters</p>
+                </div>
+            </div>
+
+            <button id="start-btn" class="btn primary-btn pulse">Start Analysis</button>
+            <p class="disclaimer">Processing happens locally on your device.</p>
+        </div>
+
+        <!-- Recording/Analysis View -->
+        <div id="analysis-view" class="view">
+            <div class="video-container">
+                <video id="input-video" playsinline muted></video>
+                <canvas id="output-canvas"></canvas>
+                <div id="loading-overlay" class="hidden">
+                    <div class="spinner"></div>
+                    <p>Loading AI Model...</p>
+                </div>
+                <div id="countdown-overlay" class="hidden">3</div>
+            </div>
+
+            <div class="controls-overlay">
+                <div id="live-stats" class="hidden">
+                    <div class="stat-pill">👣 <span id="live-cadence">--</span> spm</div>
+                    <div class="stat-pill">📐 <span id="live-lean">--</span>°</div>
+                </div>
+                
+                <button id="record-btn" class="btn recording-btn">
+                    <div class="inner-circle"></div>
+                </button>
+                <button id="stop-btn" class="hidden btn stop-btn">
+                    <div class="square"></div>
+                </button>
+                <button id="flip-camera-btn" class="btn icon-btn">🔄</button>
+            </div>
+            
+            <button id="close-camera-btn" class="btn icon-btn top-right">✕</button>
+        </div>
+
+        <!-- Result View -->
+        <div id="result-view" class="view">
+            <header>
+                <h2>Analysis Result</h2>
+                <button id="new-scan-btn" class="btn text-btn">New Scan</button>
+            </header>
+
+            <div class="result-video-container">
+                <!-- Replay video or canvas recording -->
+                <video id="replay-video" loop playsinline controls></video>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card" id="card-cadence">
+                    <div class="metric-label">Cadence</div>
+                    <div class="metric-value"><span id="res-cadence">--</span> <small>spm</small></div>
+                    <div class="metric-status" id="status-cadence">--</div>
+                </div>
+                <div class="metric-card" id="card-hip">
+                    <div class="metric-label">Hip Stability</div>
+                    <div class="metric-value"><span id="res-hip">--</span> <small>deg</small></div>
+                    <div class="metric-status" id="status-hip">--</div>
+                </div>
+                <div class="metric-card" id="card-lean">
+                    <div class="metric-label">Forward Lean</div>
+                    <div class="metric-value"><span id="res-lean">--</span> <small>deg</small></div>
+                    <div class="metric-status" id="status-lean">--</div>
+                </div>
+                <div class="metric-card" id="card-osc">
+                    <div class="metric-label">Bounce</div>
+                    <div class="metric-value"><span id="res-osc">--</span> <small>%</small></div>
+                    <div class="metric-status" id="status-osc">--</div>
+                </div>
+            </div>
+
+            <div class="recommendations">
+                <h3>🎯 Focus Areas</h3>
+                <ul id="focus-list">
+                    <li>Analyze a run to see recommendations</li>
+                </ul>
+            </div>
+
+            <div class="actions">
+                <button id="share-btn" class="btn secondary-btn">Share Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>

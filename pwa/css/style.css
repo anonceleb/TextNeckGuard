@@ -1,0 +1,450 @@
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --bg: #111827;
+    --bg-card: #1f2937;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    overflow: hidden; /* Prevent scrolling on main body, views handle scrolling */
+    height: 100vh;
+    width: 100vw;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.view.active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+}
+
+/* Landing View */
+#landing-view {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2rem;
+    background: linear-gradient(to right, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.card {
+    background-color: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #374151;
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+}
+
+.card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.card ol {
+    padding-left: 1.2rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.card li {
+    margin-bottom: 0.5rem;
+}
+
+.illustration {
+    margin-top: 1.5rem;
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 0.5rem;
+}
+
+.cam-setup {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.small {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.btn {
+    border: none;
+    border-radius: 9999px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+    outline: none;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.primary-btn {
+    background: linear-gradient(to right, var(--primary), var(--primary-dark));
+    color: white;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+
+.disclaimer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: #4b5563;
+}
+
+/* Analysis View */
+#analysis-view {
+    padding: 0;
+    background: black;
+    justify-content: center;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+video, canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#output-canvas {
+    z-index: 2;
+}
+
+#input-video {
+    z-index: 1;
+    transform: scaleX(-1); /* Mirror effect for selfie cam, adjusted in JS for rear */
+}
+
+.controls-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.recording-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid white;
+    background: transparent;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inner-circle {
+    width: 60px;
+    height: 60px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.stop-btn .square {
+    width: 30px;
+    height: 30px;
+    background-color: #ef4444;
+    border-radius: 4px;
+}
+
+.stop-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid white;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+
+.hidden {
+    display: none !important;
+}
+
+#flip-camera-btn {
+    position: absolute;
+    right: 2rem;
+    background: rgba(255,255,255,0.2);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.top-right {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 20;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+#live-stats {
+    position: absolute;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1rem;
+    z-index: 10;
+}
+
+.stat-pill {
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Results View */
+#result-view {
+    padding-top: 2rem;
+}
+
+#result-view header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.text-btn {
+    background: transparent;
+    color: var(--primary);
+    padding: 0.5rem;
+}
+
+.result-video-container {
+    width: 100%;
+    height: 250px;
+    background: black;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+#replay-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-card);
+    padding: 1rem;
+    border-radius: 1rem;
+    border-left: 4px solid #374151;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.metric-value small {
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.metric-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.recommendations {
+    background: #2D3748; /* Slightly lighter */
+    padding: 1.5rem;
+    border-radius: 1rem;
+    margin-bottom: 5rem;
+}
+
+.recommendations h3 {
+    margin-bottom: 1rem;
+}
+
+.recommendations ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.recommendations li {
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    background: var(--bg);
+    border-top: 1px solid #374151;
+    z-index: 5;
+}
+
+.secondary-btn {
+    background: #374151;
+    color: white;
+    width: 100%;
+}
+
+/* Loading Spinner */
+#loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#countdown-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    z-index: 30;
+}

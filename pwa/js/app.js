@@ -58,7 +58,9 @@ const resultElements = {
     hipCard: document.getElementById('card-hip'),
     leanCard: document.getElementById('card-lean'),
     oscCard: document.getElementById('card-osc'),
-    focusList: document.getElementById('focus-list')
+    focusList: document.getElementById('focus-list'),
+    exercisesList: document.getElementById('exercises-list'),
+    exercisesContainer: document.getElementById('exercises-container')
 };
 
 // Canvas context
@@ -462,4 +464,34 @@ function showResults(data) {
     if (data.oscillation > 10) addRec("Focus on gliding, not bouncing up and down");
 
     if (list.children.length === 0) addRec("Great form! Keep it consistent.");
+
+    // Exercises
+    const exList = resultElements.exercisesList;
+    const exContainer = resultElements.exercisesContainer;
+    exList.innerHTML = "";
+
+    const addEx = (name, reps, why) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${name}</strong><br><span style="color:#9ca3af;font-size:0.85rem">${reps}</span><br><span style="font-size:0.85rem;font-style:italic">${why}</span>`;
+        exList.appendChild(li);
+    }
+
+    let hasExercises = false;
+    if (data.hipDrop > 8) {
+        addEx("Single-leg Glute Bridges", "3 sets × 15 reps", "Strengthens glutes for stability");
+        addEx("Clamshells (Band)", "3 sets × 20 reps", "Targets hip abductors");
+        hasExercises = true;
+    }
+    if (data.cadence < 165) {
+        addEx("Metronome Drills", "Run to 170-180 bpm beat", "Retrains neuromuscular timing");
+        addEx("Ankle Hops", "3 sets × 30 sec", "Improves elasticity & contact time");
+        hasExercises = true;
+    }
+    if (data.lean > 15 || data.lean < 2) {
+        addEx("Wall Drills", "3 sets × 1 min", "Reinforces proper lean angle from ankles");
+        addEx("Plank Variations", "3 sets × 45 sec", "Core strength holds posture");
+        hasExercises = true;
+    }
+
+    exContainer.style.display = hasExercises ? 'block' : 'none';
 }

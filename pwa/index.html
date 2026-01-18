@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,8 +10,10 @@
     <!-- MediaPipe dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
 </head>
+
 <body>
     <div id="app">
         <!-- Landing View -->
@@ -19,7 +22,7 @@
                 <h1>🏃 Form Check Friday</h1>
                 <p>AI-powered running form analysis</p>
             </header>
-            
+
             <div class="card intro-card">
                 <h2>How it works</h2>
                 <ol>
@@ -60,7 +63,7 @@
                     <div class="stat-pill">👣 <span id="live-cadence">--</span> spm</div>
                     <div class="stat-pill">📐 <span id="live-lean">--</span>°</div>
                 </div>
-                
+
                 <button id="record-btn" class="btn recording-btn">
                     <div class="inner-circle"></div>
                 </button>
@@ -69,7 +72,7 @@
                 </button>
                 <button id="flip-camera-btn" class="btn icon-btn">🔄</button>
             </div>
-            
+
             <button id="close-camera-btn" class="btn icon-btn top-right">✕</button>
         </div>
 
@@ -115,6 +118,12 @@
                 </ul>
             </div>
 
+            <div class="recommendations" id="exercises-container" style="margin-top: 1rem; display: none;">
+                <h3>💪 Recommended Exercises</h3>
+                <ul id="exercises-list">
+                </ul>
+            </div>
+
             <div class="actions">
                 <button id="share-btn" class="btn secondary-btn">Share Report</button>
             </div>
@@ -129,4 +138,5 @@
         }
     </script>
 </body>
+
 </html>

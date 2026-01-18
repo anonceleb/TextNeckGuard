@@ -253,7 +253,7 @@
             await setupCameraStream();
 
             if (!state.pose) {
-                await initPose();
+                await initMediaPipe();
             }
 
             switchView('analysis');

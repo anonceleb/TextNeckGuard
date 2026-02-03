@@ -1,4 +1,4 @@
-const CACHE_NAME = 'form-check-v1';
+const CACHE_NAME = 'text-neck-v2';
 const ASSETS = [
     './',
     './index.html',

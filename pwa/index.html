@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Form Check Friday</title>
+    <title>Text Neck Guard</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
+
     <!-- MediaPipe dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
         crossorigin="anonymous"></script>
@@ -17,123 +17,118 @@
 
 <body>
     <div id="app">
-        <!-- Landing View -->
-        <div id="landing-view" class="view active">
-            <header>
-                <h1>🏃 Form Check Friday</h1>
-                <p>AI-powered running form analysis</p>
-                <div id="auth-status" style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 0.5rem; display:none;">
-                    Logged in as <span id="user-email"></span>
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="logo">Text Neck Guard</h1>
+            <div class="header-controls">
+                <div class="status-indicator" id="status-indicator">
+                    <span class="status-dot"></span>
+                    <span id="status-text">Inactive</span>
                 </div>
-                <button id="auth-btn" class="btn secondary-btn"
-                    style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-top: 1rem;">Sign In</button>
-            </header>
+                <button id="settings-btn" class="btn-icon">⚙️</button>
+            </div>
+        </header>
 
-            <div class="card intro-card">
-                <h2>How it works</h2>
-                <ol>
-                    <li>Place camera at <strong>hip height</strong></li>
-                    <li>Record from the <strong>side</strong> (profile view)</li>
-                    <li>Run for <strong>10-15 seconds</strong></li>
-                    <li>Get instant AI analysis</li>
-                </ol>
-                <div class="illustration">
-                    <!-- Simple CSS illustration or placeholder -->
-                    <div class="cam-setup">
-                        <div class="runner">🏃</div>
-                        <div class="arrow">↔️</div>
-                        <div class="phone">📱</div>
+        <!-- Main Content (Reading Area) -->
+        <main id="reading-container" class="reading-container">
+            <div class="content-wrapper">
+                <p class="intro">
+                    Enable the guard to protect your neck while reading.
+                    If you look down for too long, the text will blur and your phone will vibrate.
+                </p>
+
+                <article id="sample-article" class="article-content">
+                    <h2>The Silent Epidemic of "Text Neck"</h2>
+                    <p>In an age where digital connection is paramount, a silent physical toll is being exacted on the
+                        human body. "Text Neck," a term coined to describe the repeated stress injury and pain in the
+                        neck resulting from excessive watching or texting on handheld devices for long periods of time,
+                        is becoming increasingly prevalent.</p>
+                    <p>The human head weighs about 10 to 12 pounds. However, as the neck bends forward and down, the
+                        weight on the cervical spine begins to increase. At a 15-degree angle, this weight is about 27
+                        pounds, at 30 degrees it’s 40 pounds, at 45 degrees it’s 49 pounds, and at 60 degrees it’s 60
+                        pounds.</p>
+                    <p>Imagine carrying an 8-year-old around your neck for several hours a day. Commuters, students, and
+                        office workers are particularly at risk. The long-term effects can include early onset
+                        arthritis, spinal degeneration, muscle strain, and even pinched nerves.</p>
+                    <h3>How This App Helps</h3>
+                    <p>By using the front-facing camera, this application uses advanced computer vision to detect the
+                        angle of your neck. It establishes a feedback loop.</p>
+                    <p>When you maintain a healthy posture, the text remains clear. As you slouch or bend your neck
+                        excessively (>45 degrees) for a sustained period, the app gently nudges you back to better
+                        posture by blurring the text you are trying to read and providing haptic feedback.</p>
+                    <p>This "operant conditioning" helps build muscle memory for better posture without the need for
+                        constant conscious effort.</p>
+                    <p>Review the settings to adjust sensitivity or read more content.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+                        mollit anim id est laborum.</p>
+                </article>
+            </div>
+        </main>
+
+        <!-- Controls / Floating Action Button -->
+        <div class="controls">
+            <button id="toggle-guard-btn" class="btn-fab">
+                🛡️ Activate
+            </button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button id="close-settings" class="btn-text">✕</button>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Calibration</h3>
+                    <p class="setting-desc">Sit up straight with phone at eye level.</p>
+                    <button id="calibrate-btn" class="btn-secondary">Set Healthy Posture (Zero)</button>
+                    <p id="calibration-status" class="status-small">Default</p>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Time Limit</h3>
+                    <div class="range-wrap">
+                        <label for="timer-slider">Delay</label>
+                        <input type="range" id="timer-slider" min="2" max="120" step="1" value="5">
+                        <span id="timer-val">5s</span>
                     </div>
-                    <p class="small">Distance: 3-5 meters</p>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Sensitivity</h3>
+                    <div class="range-wrap">
+                        <label for="sensitivity-slider">Tolerance</label>
+                        <input type="range" id="sensitivity-slider" min="0.5" max="1.5" step="0.05" value="0.85">
+                        <span id="sensitivity-val">0.85</span>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Content</h3>
+                    <textarea id="custom-text-input" placeholder="Paste your article or book text here..."
+                        rows="4"></textarea>
+                    <button id="load-text-btn" class="btn-primary small">Load Text</button>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Debug</h3>
+                    <button id="toggle-debug-btn" class="btn-text small">Toggle Camera View</button>
                 </div>
             </div>
-
-            <button id="start-btn" class="btn primary-btn pulse">Sign In to Start</button>
-            <p class="disclaimer">Processing happens locally on your device.</p>
         </div>
 
-        <!-- Recording/Analysis View -->
-        <div id="analysis-view" class="view">
-            <div class="video-container">
-                <video id="input-video" playsinline muted></video>
-                <canvas id="output-canvas"></canvas>
-                <div id="loading-overlay" class="hidden">
-                    <div class="spinner"></div>
-                    <p>Loading AI Model...</p>
-                </div>
-                <div id="countdown-overlay" class="hidden">3</div>
-            </div>
-
-            <div class="controls-overlay">
-                <div id="live-stats" class="hidden">
-                    <div class="stat-pill">👣 <span id="live-cadence">--</span> spm</div>
-                    <div class="stat-pill">📐 <span id="live-lean">--</span>°</div>
-                </div>
-
-                <button id="record-btn" class="btn recording-btn">
-                    <div class="inner-circle"></div>
-                </button>
-                <button id="stop-btn" class="hidden btn stop-btn">
-                    <div class="square"></div>
-                </button>
-                <button id="flip-camera-btn" class="btn icon-btn">🔄</button>
-            </div>
-
-            <button id="close-camera-btn" class="btn icon-btn top-right">✕</button>
-        </div>
-
-        <!-- Result View -->
-        <div id="result-view" class="view">
-            <header>
-                <h2>Analysis Result</h2>
-                <button id="new-scan-btn" class="btn text-btn">New Scan</button>
-            </header>
-
-            <div class="result-video-container">
-                <!-- Replay video or canvas recording -->
-                <video id="replay-video" loop playsinline controls></video>
-            </div>
-
-            <div class="metrics-grid">
-                <div class="metric-card" id="card-cadence">
-                    <div class="metric-label">Cadence</div>
-                    <div class="metric-value"><span id="res-cadence">--</span> <small>spm</small></div>
-                    <div class="metric-status" id="status-cadence">--</div>
-                </div>
-                <div class="metric-card" id="card-hip">
-                    <div class="metric-label">Hip Stability</div>
-                    <div class="metric-value"><span id="res-hip">--</span> <small>deg</small></div>
-                    <div class="metric-status" id="status-hip">--</div>
-                </div>
-                <div class="metric-card" id="card-lean">
-                    <div class="metric-label">Forward Lean</div>
-                    <div class="metric-value"><span id="res-lean">--</span> <small>deg</small></div>
-                    <div class="metric-status" id="status-lean">--</div>
-                </div>
-                <div class="metric-card" id="card-osc">
-                    <div class="metric-label">Bounce</div>
-                    <div class="metric-value"><span id="res-osc">--</span> <small>%</small></div>
-                    <div class="metric-status" id="status-osc">--</div>
-                </div>
-            </div>
-
-            <div class="recommendations">
-                <h3>🎯 Focus Areas</h3>
-                <ul id="focus-list">
-                    <li>Analyze a run to see recommendations</li>
-                </ul>
-            </div>
-
-            <div class="recommendations" id="exercises-container" style="margin-top: 1rem; display: none;">
-                <h3>💪 Recommended Exercises</h3>
-                <ul id="exercises-list">
-                </ul>
-            </div>
-
-            <div class="actions">
-                <button id="upload-btn" class="btn primary-btn">☁️ Send to Coach</button>
-                <button id="share-btn" class="btn secondary-btn">Share Local Report</button>
-            </div>
+        <!-- Hidden Camera Feed for Debug/Setup -->
+        <div id="camera-preview" class="camera-preview hidden">
+            <video id="input-video" playsinline muted></video>
+            <canvas id="output-canvas"></canvas>
+            <div class="close-preview" id="close-preview">✕</div>
+            <div class="debug-info" id="debug-info">Pitch: --</div>
         </div>
     </div>
 

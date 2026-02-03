@@ -1,8 +1,8 @@
 {
-    "name": "Form Check Friday",
-    "short_name": "FormCheck",
+    "name": "Text Neck Haptic Guard",
+    "short_name": "TextNeck",
     "background_color": "#111827",
-    "theme_color": "#6366f1",
+    "theme_color": "#ef4444",
     "display": "standalone",
     "orientation": "portrait",
     "scope": "./",

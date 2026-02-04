@@ -339,12 +339,18 @@ function updateStatusUI(reason = 'GOOD') {
             isWarning = false;
         } else if (badPostureStartTime) {
             const duration = Date.now() - badPostureStartTime;
-            const type = reason === 'TILT' ? 'Tilting!' : 'Slouching!';
+            let type = 'Bad Posture';
+
+            if (reason === 'TILT') type = 'Tilting!';
+            else if (reason === 'SHRUG') type = 'Shrugging!';
+            else type = 'Slouching!';
+
             text = `${type} (${Math.floor(duration / 1000)}s)`;
             isWarning = true;
 
             // Avatar Logic
             if (reason === 'TILT') emoji = '📐'; // Ruler
+            else if (reason === 'SHRUG') emoji = '💪'; // Flexed bicep
             else emoji = '🐢'; // Turtle (Slouch)
 
         } else {
@@ -410,24 +416,39 @@ function onPoseResults(results) {
     latestRatio = distMouthToShoulder / distEarToEar;
 
     // Debug Visualization
-    debugInfo.innerHTML = `Curr: ${latestRatio.toFixed(2)} <br> Thresh: ${badPostureThreshold.toFixed(2)} (Base:${baselineRatio.toFixed(2)})`;
+    const leftEarY = leftEar.y;
+    const rightEarY = rightEar.y;
+    const avgEarY = (leftEarY + rightEarY) / 2;
+    const leftShoulderY = leftShoulder.y;
+    const rightShoulderY = rightShoulder.y;
+    const avgShoulderY = (leftShoulderY + rightShoulderY) / 2;
+    const earToShoulderDist = avgShoulderY - avgEarY;
+
+    debugInfo.innerHTML = `Curr: ${latestRatio.toFixed(2)} <br> Thresh: ${badPostureThreshold.toFixed(2)} (Base:${baselineRatio.toFixed(2)}) <br> Ear-Shoulder: ${earToShoulderDist.toFixed(3)}`;
 
     if (!isGuardActive) return; // Only trigger if active
 
     // Check Thresholds
-    let postureState = 'GOOD'; // GOOD, SLOUCH, TILT
+    let postureState = 'GOOD'; // GOOD, SLOUCH, TILT, SHRUG
 
-    // 1. Check Forward Head (Slouch)
-    if (latestRatio < badPostureThreshold) {
+    // 1. Check Shoulder Shrug FIRST (before slouch check)
+    // When shrugging, shoulders rise and ear-to-shoulder distance decreases
+    const shrugThreshold = 0.38; // Calibrated: normal ~0.48, full shrug ~0.39
+
+    if (earToShoulderDist < shrugThreshold) {
+        postureState = 'SHRUG';
+    }
+
+    // 2. Check Forward Head (Slouch) - only if not shrugging
+    if (postureState === 'GOOD' && latestRatio < badPostureThreshold) {
         postureState = 'SLOUCH';
     }
 
-    // 2. Check Lateral Tilt (Side Bending)
-    // If the vertical distance between ears is significant relative to the horizontal width
+    // 3. Check Lateral Tilt (Side Bending)
     const earYDiff = Math.abs(leftEar.y - rightEar.y);
     const tiltThreshold = distEarToEar * 0.35; // Approx 20 degrees tilt tolerance
 
-    if (earYDiff > tiltThreshold) {
+    if (earYDiff > tiltThreshold && postureState === 'GOOD') {
         postureState = 'TILT';
     }
 

@@ -29,6 +29,12 @@ const toggleDebugBtn = document.getElementById('toggle-debug-btn');
 const articleContent = document.getElementById('sample-article');
 const timerSlider = document.getElementById('timer-slider');
 const timerVal = document.getElementById('timer-val');
+const pipBtn = document.getElementById('pip-btn');
+
+// PiP State
+let pipWindow = null;
+let pipStatusIndicator = null;
+let pipStatusText = null;
 
 // State
 let isGuardActive = false;
@@ -55,6 +61,13 @@ function init() {
     setupEventListeners();
     initMediaPipe();
     updateThreshold();
+    checkPiPSupport();
+}
+
+function checkPiPSupport() {
+    if ('documentPictureInPicture' in window) {
+        pipBtn.classList.remove('hidden');
+    }
 }
 
 function loadSettings() {
@@ -88,6 +101,9 @@ function loadSettings() {
 
 function setupEventListeners() {
     toggleBtn.addEventListener('click', toggleGuard);
+    pipBtn.addEventListener('click', togglePiP);
+
+    // Settings Modal
 
     // Settings Modal
     settingsBtn.addEventListener('click', () => {
@@ -231,10 +247,143 @@ async function toggleGuard() {
         disablePenalty();
         badPostureStartTime = null;
     }
+    updateStatusUI();
+}
+
+async function togglePiP() {
+    if (!pipWindow) {
+        // Open PiP
+        try {
+            pipWindow = await documentPictureInPicture.requestWindow({
+                width: 300,
+                height: 150,
+            });
+
+            // Add Class for styling
+            pipWindow.document.body.classList.add('pip-mode');
+
+            // Copy Styles
+            // 1. Main Styles
+            const mainStyleLink = document.createElement('link');
+            mainStyleLink.rel = 'stylesheet';
+            mainStyleLink.href = 'css/style.css';
+            pipWindow.document.head.appendChild(mainStyleLink);
+
+            // 2. PiP Specific Styles
+            const pipStyleLink = document.createElement('link');
+            pipStyleLink.rel = 'stylesheet';
+            pipStyleLink.href = 'css/pip.css';
+            pipWindow.document.head.appendChild(pipStyleLink);
+
+            // Construct Content
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <div class="pip-header"> 
+                    <span id="pip-avatar" style="font-size: 2rem; display: block; margin-bottom: 5px;">🦒</span>
+                </div>
+                <div class="status-indicator" id="pip-status-indicator">
+                    <span id="pip-status-text">Great Posture</span>
+                </div>
+                <div class="pip-controls">
+                     <button id="pip-close-btn" style="padding: 4px 8px; font-size: 0.8rem;">Stop</button>
+                </div>
+            `;
+            pipWindow.document.body.appendChild(container);
+
+            // Init PiP Refs
+            pipStatusIndicator = pipWindow.document.getElementById('pip-status-indicator');
+            pipStatusText = pipWindow.document.getElementById('pip-status-text');
+            const pipAvatar = pipWindow.document.getElementById('pip-avatar');
+
+            // attach avatar to global scope for update function (hacky but works for now)
+            window.pipAvatarRef = pipAvatar;
+
+            // Event Listeners
+            pipWindow.document.getElementById('pip-close-btn').addEventListener('click', () => {
+                pipWindow.close();
+            });
+
+            // Handle Closing
+            pipWindow.addEventListener('pagehide', () => {
+                pipWindow = null;
+                pipStatusIndicator = null;
+                pipStatusText = null;
+                window.pipAvatarRef = null;
+                pipBtn.classList.remove('active'); // Optional visual state
+            });
+
+            updateStatusUI(); // Sync immediate state
+
+        } catch (err) {
+            console.error("Failed to open PiP:", err);
+        }
+    } else {
+        // Close PiP
+        pipWindow.close();
+    }
+}
+
+function updateStatusUI(reason = 'GOOD') {
+    // Determine current state text/class
+    let text = 'Inactive';
+    let isWarning = false;
+    let isActive = isGuardActive;
+    let emoji = '😴'; // Default Sleep
+
+    if (isGuardActive) {
+        if (reason === 'IDLE') {
+            // User left the frame - reset timer and show idle
+            badPostureStartTime = null;
+            text = 'Away / Idle';
+            emoji = '😴';
+            isWarning = false;
+        } else if (badPostureStartTime) {
+            const duration = Date.now() - badPostureStartTime;
+            const type = reason === 'TILT' ? 'Tilting!' : 'Slouching!';
+            text = `${type} (${Math.floor(duration / 1000)}s)`;
+            isWarning = true;
+
+            // Avatar Logic
+            if (reason === 'TILT') emoji = '📐'; // Ruler
+            else emoji = '🐢'; // Turtle (Slouch)
+
+        } else {
+            text = 'Great Posture';
+            emoji = '🦒'; // Giraffe (Tall/Good)
+        }
+    }
+
+    // Update Main UI
+    statusText.textContent = text;
+    if (isActive) {
+        statusIndicator.classList.add('active');
+        if (isWarning) statusIndicator.classList.add('warning');
+        else statusIndicator.classList.remove('warning');
+    } else {
+        statusIndicator.classList.remove('active', 'warning');
+    }
+
+    // Update PiP UI if exists
+    if (pipWindow && pipStatusIndicator && pipStatusText) {
+        pipStatusText.textContent = text;
+        if (window.pipAvatarRef) window.pipAvatarRef.textContent = emoji;
+
+        if (isActive) {
+            pipStatusIndicator.classList.add('active');
+            if (isWarning) pipStatusIndicator.classList.add('warning');
+            else pipStatusIndicator.classList.remove('warning');
+        } else {
+            pipStatusIndicator.classList.remove('active', 'warning');
+        }
+    }
 }
 
 function onPoseResults(results) {
-    if (!results.poseLandmarks) return;
+    if (!results.poseLandmarks) {
+        // No user detected -> IDLE
+        updateStatusUI('IDLE');
+        return;
+    }
 
     drawDebug(results);
 
@@ -265,23 +414,40 @@ function onPoseResults(results) {
 
     if (!isGuardActive) return; // Only trigger if active
 
-    // Check Threshold
+    // Check Thresholds
+    let postureState = 'GOOD'; // GOOD, SLOUCH, TILT
+
+    // 1. Check Forward Head (Slouch)
     if (latestRatio < badPostureThreshold) {
-        handleBadPosture(true);
+        postureState = 'SLOUCH';
+    }
+
+    // 2. Check Lateral Tilt (Side Bending)
+    // If the vertical distance between ears is significant relative to the horizontal width
+    const earYDiff = Math.abs(leftEar.y - rightEar.y);
+    const tiltThreshold = distEarToEar * 0.35; // Approx 20 degrees tilt tolerance
+
+    if (earYDiff > tiltThreshold) {
+        postureState = 'TILT';
+    }
+
+    if (postureState !== 'GOOD') {
+        handleBadPosture(true, postureState);
     } else {
         handleBadPosture(false);
     }
 }
 
-function handleBadPosture(isBad) {
+function handleBadPosture(isBad, reason = 'BAD') {
     if (isBad) {
         if (!badPostureStartTime) {
             badPostureStartTime = Date.now();
         }
 
         const duration = Date.now() - badPostureStartTime;
-        statusText.textContent = `Bad Posture (${Math.floor(duration / 1000)}s)`;
-        statusIndicator.classList.add('warning');
+        // statusText.textContent = `Bad Posture (${Math.floor(duration / 1000)}s)`;
+        // statusIndicator.classList.add('warning');
+        updateStatusUI(reason); // Pass reason to UI
 
         if (duration > timeLimitMs) {
             triggerPenalty();
@@ -289,9 +455,10 @@ function handleBadPosture(isBad) {
 
     } else {
         badPostureStartTime = null;
-        statusText.textContent = 'Posture: Good';
-        statusIndicator.classList.remove('warning');
-        statusIndicator.classList.add('active');
+        // statusText.textContent = 'Posture: Good';
+        // statusIndicator.classList.remove('warning');
+        // statusIndicator.classList.add('active');
+        updateStatusUI('GOOD');
         disablePenalty();
     }
 }

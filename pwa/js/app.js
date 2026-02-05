@@ -278,9 +278,6 @@ async function togglePiP() {
             // Construct Content
             const container = document.createElement('div');
             container.innerHTML = `
-                <div class="pip-header"> 
-                    <span id="pip-avatar" style="font-size: 2rem; display: block; margin-bottom: 5px;">🦒</span>
-                </div>
                 <div class="status-indicator" id="pip-status-indicator">
                     <span id="pip-status-text">Great Posture</span>
                 </div>
@@ -293,10 +290,6 @@ async function togglePiP() {
             // Init PiP Refs
             pipStatusIndicator = pipWindow.document.getElementById('pip-status-indicator');
             pipStatusText = pipWindow.document.getElementById('pip-status-text');
-            const pipAvatar = pipWindow.document.getElementById('pip-avatar');
-
-            // attach avatar to global scope for update function (hacky but works for now)
-            window.pipAvatarRef = pipAvatar;
 
             // Event Listeners
             pipWindow.document.getElementById('pip-close-btn').addEventListener('click', () => {
@@ -308,7 +301,6 @@ async function togglePiP() {
                 pipWindow = null;
                 pipStatusIndicator = null;
                 pipStatusText = null;
-                window.pipAvatarRef = null;
                 pipBtn.classList.remove('active'); // Optional visual state
             });
 
@@ -372,7 +364,6 @@ function updateStatusUI(reason = 'GOOD') {
     // Update PiP UI if exists
     if (pipWindow && pipStatusIndicator && pipStatusText) {
         pipStatusText.textContent = text;
-        if (window.pipAvatarRef) window.pipAvatarRef.textContent = emoji;
 
         if (isActive) {
             pipStatusIndicator.classList.add('active');

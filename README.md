@@ -1,4 +1,4 @@
-# Text Neck Haptic Guard 🛡️
+# Spine Shine (Haptic Guard) 🛡️
 
 A "Sophisticated" Utility that runs quietly in the background (or as an active "Reading Mode") to protect your neck posture.
 
@@ -8,7 +8,7 @@ A "Sophisticated" Utility that runs quietly in the background (or as an active "
 ## The Problem
 Looking down at a phone at 60° puts **60lbs of force** on the neck ("Text Neck"). This leads to pain, strain, and long-term spinal issues.
 
-## The Solution
+## The Solution: Spine Shine
 When your neck angle exceeds a safe threshold (e.g. 45°) for more than a set time, the phone **gently vibrates** or **blurs the text**. It forces you to lift the phone to eye level to read clearly.
 
 **Why it works**: Immediate, physical feedback loop. No charts, no doctors, just "Fix your posture to continue reading."

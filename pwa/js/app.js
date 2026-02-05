@@ -1,5 +1,5 @@
 /**
- * Text Neck Haptic Guard - app.js
+ * Spine Shine - app.js
  * Uses MediaPipe Pose to detect neck flexion and triggered haptic feedback.
  */
 

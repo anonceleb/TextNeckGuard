@@ -57,6 +57,7 @@ body {
     font-size: 1.25rem;
     font-weight: 700;
     background: linear-gradient(45deg, #6366f1, #818cf8);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -117,12 +118,115 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-.content-wrapper {
-    max-width: 650px;
+/* Info Grid - 2 Column Layout */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
     margin: 0 auto;
     padding-bottom: 80px;
-    /* Space for FAB */
-    transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+.info-section {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.info-section h2 {
+    color: #e5e7eb;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.info-section h3 {
+    color: #d1d5db;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.info-section p {
+    margin-bottom: 1rem;
+    color: #d1d5db;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.info-section ul,
+.info-section ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-section li {
+    margin-bottom: 0.5rem;
+    color: #d1d5db;
+    line-height: 1.6;
+}
+
+.how-to-list {
+    counter-reset: step-counter;
+    list-style: none;
+    margin-left: 0;
+}
+
+.how-to-list>li {
+    counter-increment: step-counter;
+    margin-bottom: 1.5rem;
+    padding-left: 2.5rem;
+    position: relative;
+}
+
+.how-to-list>li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.settings-info {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.settings-info ul {
+    list-style: none;
+    margin-left: 0;
+}
+
+.settings-info li {
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.settings-info li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #6366f1;
+    font-size: 1.5rem;
+    line-height: 1;
 }
 
 .article-content h2 {

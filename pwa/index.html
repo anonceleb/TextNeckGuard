@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Text Neck Guard</title>
+    <title>PosturePal - AI Posture Monitor</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calibration.css">
 
     <!-- MediaPipe dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
@@ -19,7 +20,7 @@
     <div id="app">
         <!-- Header -->
         <header class="app-header">
-            <h1 class="logo">Text Neck Guard</h1>
+            <h1 class="logo">PosturePal</h1>
             <div class="header-controls">
                 <div class="status-indicator" id="status-indicator">
                     <span class="status-dot"></span>
@@ -29,43 +30,74 @@
             </div>
         </header>
 
-        <!-- Main Content (Reading Area) -->
+        <!-- Main Content -->
         <main id="reading-container" class="reading-container">
-            <div class="content-wrapper">
-                <p class="intro">
-                    Enable the guard to protect your neck while reading.
-                    If you look down for too long, the text will blur and your phone will vibrate.
-                </p>
+            <div class="info-grid">
+                <!-- Left Column: About -->
+                <div class="info-section">
+                    <h2>🦒 About PosturePal</h2>
+                    <p>
+                        <strong>Your AI-powered posture companion</strong> that helps you maintain healthy neck and
+                        shoulder alignment while working on your computer.
+                    </p>
+                    <p>
+                        Using advanced computer vision, PosturePal monitors your posture in real-time
+                        and alerts you when you:
+                    </p>
+                    <ul>
+                        <li><strong>🐢 Slouch</strong> - Forward head posture</li>
+                        <li><strong>📐 Tilt</strong> - Lateral neck bending</li>
+                        <li><strong>💪 Shrug</strong> - Raised shoulders</li>
+                    </ul>
+                    <p>
+                        <strong>100% Private:</strong> All processing happens locally in your browser. No data is ever
+                        sent to servers.
+                    </p>
+                    <p>
+                        <strong>Picture-in-Picture Mode:</strong> Pop out a floating widget that stays on top of all
+                        your apps.
+                    </p>
+                </div>
 
-                <article id="sample-article" class="article-content">
-                    <h2>The Silent Epidemic of "Text Neck"</h2>
-                    <p>In an age where digital connection is paramount, a silent physical toll is being exacted on the
-                        human body. "Text Neck," a term coined to describe the repeated stress injury and pain in the
-                        neck resulting from excessive watching or texting on handheld devices for long periods of time,
-                        is becoming increasingly prevalent.</p>
-                    <p>The human head weighs about 10 to 12 pounds. However, as the neck bends forward and down, the
-                        weight on the cervical spine begins to increase. At a 15-degree angle, this weight is about 27
-                        pounds, at 30 degrees it’s 40 pounds, at 45 degrees it’s 49 pounds, and at 60 degrees it’s 60
-                        pounds.</p>
-                    <p>Imagine carrying an 8-year-old around your neck for several hours a day. Commuters, students, and
-                        office workers are particularly at risk. The long-term effects can include early onset
-                        arthritis, spinal degeneration, muscle strain, and even pinched nerves.</p>
-                    <h3>How This App Helps</h3>
-                    <p>By using the front-facing camera, this application uses advanced computer vision to detect the
-                        angle of your neck. It establishes a feedback loop.</p>
-                    <p>When you maintain a healthy posture, the text remains clear. As you slouch or bend your neck
-                        excessively (>45 degrees) for a sustained period, the app gently nudges you back to better
-                        posture by blurring the text you are trying to read and providing haptic feedback.</p>
-                    <p>This "operant conditioning" helps build muscle memory for better posture without the need for
-                        constant conscious effort.</p>
-                    <p>Review the settings to adjust sensitivity or read more content.</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
-                        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                        laboris nisi ut aliquip ex ea commodo consequat.</p>
-                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                        mollit anim id est laborum.</p>
-                </article>
+                <!-- Right Column: How to Use -->
+                <div class="info-section">
+                    <h2>🚀 How to Use</h2>
+                    <ol class="how-to-list">
+                        <li>
+                            <strong>Calibrate (Recommended)</strong><br>
+                            Click Settings → "Start Calibration Wizard" to personalize detection for your physique and
+                            camera angle. Takes ~30 seconds.
+                        </li>
+                        <li>
+                            <strong>Activate Guard</strong><br>
+                            Click the "🛡️ Activate" button and allow camera permissions.
+                        </li>
+                        <li>
+                            <strong>Pop Out Widget (Optional)</strong><br>
+                            Click "↗️" to launch a floating window that stays on top of all apps.
+                        </li>
+                        <li>
+                            <strong>Work Normally</strong><br>
+                            The emoji avatar changes based on your posture:
+                            <ul style="margin-top: 8px;">
+                                <li>🦒 Great Posture</li>
+                                <li>🐢 Slouching</li>
+                                <li>📐 Tilting</li>
+                                <li>💪 Shrugging</li>
+                                <li>😴 Away/Idle</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <div class="settings-info">
+                        <h3>⚙️ Settings</h3>
+                        <ul>
+                            <li><strong>Sensitivity:</strong> Adjust detection threshold</li>
+                            <li><strong>Timer:</strong> How long before alert triggers</li>
+                            <li><strong>Calibration:</strong> Personalize to your body</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -126,6 +158,128 @@
             </div>
         </div>
 
+        <!-- Calibration Wizard Modal -->
+        <div id="calibration-modal" class="calibration-modal hidden">
+            <div class="calibration-content">
+                <div class="calibration-header">
+                    <h2>Posture Calibration Wizard</h2>
+                    <div class="calibration-progress">
+                        <div class="progress-dot" data-step="0"></div>
+                        <div class="progress-dot" data-step="1"></div>
+                        <div class="progress-dot" data-step="2"></div>
+                        <div class="progress-dot" data-step="3"></div>
+                        <div class="progress-dot" data-step="4"></div>
+                        <div class="progress-dot" data-step="5"></div>
+                    </div>
+                </div>
+
+                <!-- Step 0: Welcome -->
+                <div class="calibration-step active" data-step="0">
+                    <div class="step-instruction">
+                        <h3>Welcome! 👋</h3>
+                        <p>This wizard will personalize Text Neck Guard to your unique physique and camera setup.</p>
+                        <p style="margin-top: 10px;">You'll be asked to demonstrate different postures. The process
+                            takes about 2-3 minutes.</p>
+                    </div>
+                    <div class="calibration-actions">
+                        <button class="btn-calibrate secondary" id="cal-cancel">Cancel</button>
+                        <button class="btn-calibrate primary" id="cal-start">Start Calibration</button>
+                    </div>
+                </div>
+
+                <!-- Step 1: Good Posture -->
+                <div class="calibration-step" data-step="1">
+                    <div class="step-instruction">
+                        <h3>Step 1: Good Posture 🦒</h3>
+                        <p>Sit up straight with your phone/screen at eye level. Keep your shoulders relaxed and head
+                            aligned with your spine.</p>
+                    </div>
+                    <div class="sample-indicator">
+                        <span class="sample-emoji">🦒</span>
+                        <div class="sample-count">Collecting samples: <span id="cal-good-count">0</span>/3</div>
+                        <div class="sample-progress-bar">
+                            <div class="sample-progress-fill" id="cal-good-progress"></div>
+                        </div>
+                    </div>
+                    <div class="calibration-actions">
+                        <button class="btn-calibrate primary" id="cal-collect-good">Hold This Posture</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Slouch -->
+                <div class="calibration-step" data-step="2">
+                    <div class="step-instruction">
+                        <h3>Step 2: Slouching 🐢</h3>
+                        <p>Lean forward and look down at your device. This is the "text neck" posture we want to detect.
+                        </p>
+                    </div>
+                    <div class="sample-indicator">
+                        <span class="sample-emoji">🐢</span>
+                        <div class="sample-count">Collecting samples: <span id="cal-slouch-count">0</span>/3</div>
+                        <div class="sample-progress-bar">
+                            <div class="sample-progress-fill" id="cal-slouch-progress"></div>
+                        </div>
+                    </div>
+                    <div class="calibration-actions">
+                        <button class="btn-calibrate primary" id="cal-collect-slouch">Hold This Posture</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Tilt -->
+                <div class="calibration-step" data-step="3">
+                    <div class="step-instruction">
+                        <h3>Step 3: Head Tilt 📐</h3>
+                        <p>Tilt your head to the left or right (like resting it on your shoulder). We'll detect lateral
+                            neck bending.</p>
+                    </div>
+                    <div class="sample-indicator">
+                        <span class="sample-emoji">📐</span>
+                        <div class="sample-count">Collecting samples: <span id="cal-tilt-count">0</span>/3</div>
+                        <div class="sample-progress-bar">
+                            <div class="sample-progress-fill" id="cal-tilt-progress"></div>
+                        </div>
+                    </div>
+                    <div class="calibration-actions">
+                        <button class="btn-calibrate primary" id="cal-collect-tilt">Hold This Posture</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Shrug -->
+                <div class="calibration-step" data-step="4">
+                    <div class="step-instruction">
+                        <h3>Step 4: Shoulder Shrug 💪</h3>
+                        <p>Raise your shoulders up toward your ears (like shrugging). Hold this position while we
+                            collect samples.</p>
+                    </div>
+                    <div class="sample-indicator">
+                        <span class="sample-emoji">💪</span>
+                        <div class="sample-count">Collecting samples: <span id="cal-shrug-count">0</span>/3</div>
+                        <div class="sample-progress-bar">
+                            <div class="sample-progress-fill" id="cal-shrug-progress"></div>
+                        </div>
+                    </div>
+                    <div class="calibration-actions">
+                        <button class="btn-calibrate primary" id="cal-collect-shrug">Hold This Posture</button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Summary -->
+                <div class="calibration-step" data-step="5">
+                    <div class="step-instruction">
+                        <h3>Calibration Complete! ✅</h3>
+                        <p>Your personalized thresholds have been calculated based on your samples.</p>
+                    </div>
+                    <div class="calibration-summary" id="cal-summary">
+                        <!-- Summary will be populated by JS -->
+                    </div>
+                    <div class="calibration-actions">
+                        <button class="btn-calibrate secondary" id="cal-recalibrate">Recalibrate</button>
+                        <button class="btn-calibrate primary" id="cal-finish">Finish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Hidden Camera Feed for Debug/Setup -->
         <div id="camera-preview" class="camera-preview hidden">
             <video id="input-video" playsinline muted></video>
@@ -137,6 +291,7 @@
 
     <!-- Logic -->
     <script src="js/app.js"></script>
+    <script src="js/calibration.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');

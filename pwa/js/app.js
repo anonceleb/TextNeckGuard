@@ -424,6 +424,9 @@ function onPoseResults(results) {
     const avgShoulderY = (leftShoulderY + rightShoulderY) / 2;
     const earToShoulderDist = avgShoulderY - avgEarY;
 
+    // Expose for calibration wizard
+    window.latestEarToShoulderDist = earToShoulderDist;
+
     debugInfo.innerHTML = `Curr: ${latestRatio.toFixed(2)} <br> Thresh: ${badPostureThreshold.toFixed(2)} (Base:${baselineRatio.toFixed(2)}) <br> Ear-Shoulder: ${earToShoulderDist.toFixed(3)}`;
 
     if (!isGuardActive) return; // Only trigger if active
@@ -447,6 +450,9 @@ function onPoseResults(results) {
     // 3. Check Lateral Tilt (Side Bending)
     const earYDiff = Math.abs(leftEar.y - rightEar.y);
     const tiltThreshold = distEarToEar * 0.35; // Approx 20 degrees tilt tolerance
+
+    // Expose for calibration wizard
+    window.latestEarYDiff = earYDiff;
 
     if (earYDiff > tiltThreshold && postureState === 'GOOD') {
         postureState = 'TILT';

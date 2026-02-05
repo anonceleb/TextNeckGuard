@@ -1,6 +1,6 @@
 {
-    "name": "Text Neck Haptic Guard",
-    "short_name": "TextNeck",
+    "name": "PosturePal - AI Posture Monitor",
+    "short_name": "PosturePal",
     "background_color": "#111827",
     "theme_color": "#ef4444",
     "display": "standalone",
